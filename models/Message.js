@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+//const mongoose = require("mongoose");
 
-const messageSchema = new mongoose.Schema({
+/*const messageSchema = new mongoose.Schema({
     room: String,
     username: String,
     message: String,
@@ -10,3 +10,4 @@ const messageSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Message", messageSchema);
+*/
