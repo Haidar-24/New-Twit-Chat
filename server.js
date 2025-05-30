@@ -4,12 +4,12 @@ const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const Message = require("./models/Message");
+//const Message = require("./models/Message");
 const uploadRoute = require("./routes/upload");
 const path = require("path");
 
-dotenv.config(); // Load environment variables from .env file
-mongoose.connect(process.env.MONGO_URI);
+//dotenv.config(); // Load environment variables from .env file
+//mongoose.connect(process.env.MONGO_URI);
 
 app.use(express.static("public"));
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads"))); // Serve static files from the uploads directory
@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
     socket.on("chatMessage", async (data) => { 
         const { room, username, message, fileUrl, fileType } = data;  //create a new message
         const msg = new Message({ room, username, message, fileUrl, fileType }); 
-        await msg.save(); //save the message to the database
+        //await msg.save(); //save the message to the database
         io.to(room).emit("message", msg); //broadcast the message to the room
     });
 });
