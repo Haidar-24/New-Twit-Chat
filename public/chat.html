@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <h2 id="room-name"></h2>
+    <div id="chat-box"></div>
+    <input type="file" id="file" />
+    <input type="text" id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const socket = io();
+        const urlParams = new URLSearchParams(window.location.search);  // Get URL parameters
+        const username = urlParams.get("username");  // Get username from URL parameters
+        const room = urlParams.get("room");  // Get room from URL parameters
+        document.getElementById("room-name").innerText = `Room: ${room}`;  // Display the room name
+
+        socket.emit("joinRoom", room);  //emit joinRoom event with the room name
+
+        socket.on("message", (msg) => {
+            const box = document.getElementById("chat-box");  // Get the chat box element
+            let content = `<p><strong>${msg.username}:</strong> ${msg.message || ""}</p>`;  // Create content for the message
+            if (msg.fileUrl) {
+                if (msg.fileType.startsWith("image")) {  // Check if the file is an image
+                    content += `<img src="${msg.fileUrl}" width="200" />`;  // Display the image
+                } else {
+                    content += `<a href="${msg.fileUrl}" target="_blank">Download File</a>`;  // Provide a link to download the file
+                }
+            }
+            box.innerHTML += content;  // Append the message content to the chat box
+        });
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;  
+            const file = document.getElementById("file").files[0];  // Get the selected file
+
+            if (file) {
+                const formData = new FormData();  // Create a FormData object to send the file
+                formData.append("file", file);  
+
+                fetch("/upload", { method: "POST", body: formData })  // Send the file to the server
+                    .then(res => res.json())
+                    .then(data => {
+                        socket.emit("chatMessage", {
+                            room, username, message, fileUrl: data.fileUrl, fileType: data.fileType // Include file URL and type in the message
+                        });
+                    });
+            } else {
+                socket.emit("chatMessage", { room, username, message });  // Send the message without a file
+            }
+
+            document.getElementById("message").value = "";
+            document.getElementById("file").value = "";
+        }
+    </script>
+</body>
+
+</html>
